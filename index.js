@@ -5,14 +5,14 @@ THREEx.ProceduralCity	= function(){
     // 将参考点设置在立方体的底部
     geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.5, 0 ) );
     // 去掉立方体的底面
-    geometry.faces.splice( 3, 1 );
-    geometry.faceVertexUvs[0].splice( 3, 1 );
+    // geometry.faces.splice( 3, 1 );
+    // geometry.faceVertexUvs[0].splice( 3, 1 );
     // 修复顶面的UV映射
     // 屋顶将和地板颜色相同，且建筑物的各面纹理共用
-    geometry.faceVertexUvs[0][2][0].set( 0, 0 );
-    geometry.faceVertexUvs[0][2][1].set( 0, 0 );
-    geometry.faceVertexUvs[0][2][2].set( 0, 0 );
-    geometry.faceVertexUvs[0][2][3].set( 0, 0 );
+    // geometry.faceVertexUvs[0][3][3].set( 0, 0);
+    // geometry.faceVertexUvs[0][3][3].set( 0, 0 );
+    // // geometry.faceVertexUvs[0][2][2].set( 0, 0 );
+    // // geometry.faceVertexUvs[0][2][3].set( 0, 0 );
     // 建筑物网孔
     var buildingMesh= new THREE.Mesh( geometry );
 
@@ -23,13 +23,14 @@ THREEx.ProceduralCity	= function(){
     this.createBuilding	= function(){
         return buildingMesh;
     };
+    var texture = THREE.ImageUtils.loadTexture("./images/s.jpg");
 
     /**
      * 生成建筑纹理
      */
-    var buildingTexture	= new THREE.Texture(generateTextureCanvas());
-    buildingTexture.anisotropy	= renderer.getMaxAnisotropy();
-    buildingTexture.needsUpdate = true;
+    // var buildingTexture	= new THREE.Texture(texture);
+    // buildingTexture.anisotropy	= renderer.getMaxAnisotropy();
+    // buildingTexture.needsUpdate = true;
 
     /**
      * lamp
@@ -44,7 +45,7 @@ THREEx.ProceduralCity	= function(){
     var nBlockZ	= 10;//列数
     var blockSizeX = 50;//行宽
     var blockSizeZ = 50;//列宽
-    var blockDensity = 20;
+    var blockDensity = 4;
     var roadW = 8;
     var roadD = 8;
     var buildingMaxW = 15;
@@ -330,8 +331,8 @@ THREEx.ProceduralCity	= function(){
 
         // build the city Mesh
         var material	= new THREE.MeshLambertMaterial({
-            map		: buildingTexture,
-            vertexColors	: THREE.VertexColors
+            map		: THREE.ImageUtils.loadTexture("./images/s1.jpg"),
+            // vertexColors	: THREE.VertexColors
         });
         return new THREE.Mesh(cityGeometry, material );
     };
@@ -383,7 +384,6 @@ THREEx.ProceduralCity	= function(){
             }
         }
     };
-    return;
 
     function generateTextureCanvas(){
         // build a small canvas 32x64 and paint it in white
@@ -392,12 +392,12 @@ THREEx.ProceduralCity	= function(){
         canvas.height	= 64;
         var context	= canvas.getContext( '2d' );
         // plain it in white
-        context.fillStyle	= '#ffffff';
+        context.fillStyle	= '#ffb734';
         context.fillRect( 0, 0, 32, 64 );
         // draw the window rows - with a small noise to simulate light variations in each room
-        for( var y = 2; y < 64; y += 2 ){
+        for( var y = 2; y < 64; y += 4 ){
             for( var x = 0; x < 32; x += 2 ){
-                var value	= Math.floor( Math.random() * 64 );
+                var value	= Math.floor( Math.random() * 10+240 );
                 context.fillStyle = 'rgb(' + [value, value, value].join( ',' )  + ')';
                 context.fillRect( x, y, 2, 1 );
             }
@@ -418,6 +418,12 @@ THREEx.ProceduralCity	= function(){
         return canvas2;
     }
 };
+
+function initSkyBox() {
+    scene.background = new THREE.CubeTextureLoader()
+        .setPath('./images/skybox/shinei-_').load(
+            ["BK.jpg", "FR.jpg", "UP.jpg", "DN.jpg", "LF.jpg", "RT.jpg"]);
+}
 
 //渲染器
 var renderer;
@@ -459,23 +465,22 @@ function initLight() {
 
 function initObject() {
     var proceduralCity	= new THREEx.ProceduralCity();
-    var mesh	= proceduralCity.createSquareCity();
+    var mesh = proceduralCity.createSquareCity();
     scene.add(mesh);
+    initSkyBox();
 }
 
 var updateFcts	= [];
 function initControl(){
     var controls	= new THREE.FirstPersonControls(camera);
-    controls.movementSpeed	= 10;
+    controls.movementSpeed	= 100;
     controls.lookSpeed	= 0.05;
     controls.lookVertical	= true;
     updateFcts.push(function(delta){
         controls.update( delta );
     });
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //		render the scene						//
-    //////////////////////////////////////////////////////////////////////////////////
+    //	render the scene
     updateFcts.push(function(){
         renderer.render( scene, camera );
     })
