@@ -41,8 +41,8 @@ THREEx.ProceduralCity	= function(){
     /**
      * 参数设置
      */
-    var nBlockX	= 10;//行数
-    var nBlockZ	= 10;//列数
+    var nBlockX	= 8;//行数
+    var nBlockZ	= 8;//列数
     var blockSizeX = 50;//行宽
     var blockSizeZ = 50;//列宽
     var blockDensity = 4;
@@ -334,7 +334,12 @@ THREEx.ProceduralCity	= function(){
             map		: THREE.ImageUtils.loadTexture("./images/s1.jpg"),
             // vertexColors	: THREE.VertexColors
         });
-        return new THREE.Mesh(cityGeometry, material );
+        var material1	= new THREE.MeshLambertMaterial({
+            map		: THREE.ImageUtils.loadTexture("./images/a.jpg"),
+            // vertexColors	: THREE.VertexColors
+        });
+        var materials = [material, material, material1, material, material, material];
+        return new THREE.Mesh(cityGeometry, materials );
     };
 
     /**
@@ -348,12 +353,18 @@ THREEx.ProceduralCity	= function(){
         object3d.add(carLightsMesh);
 
         var lampsMesh = this.createSquareLamps();
+        lampsMesh.castShadow = true;
+        lampsMesh.receiveShadow = true;
         object3d.add(lampsMesh);
 
         var sidewalksMesh = this.createSquareSideWalks();
+        sidewalksMesh.receiveShadow = true;
+        sidewalksMesh.castShadow = true;
         object3d.add(sidewalksMesh);
 
         var buildingsMesh = this.createSquareBuildings();
+        buildingsMesh.receiveShadow = true;
+        buildingsMesh.castShadow = true;
         object3d.add(buildingsMesh);
 
         var groundMesh	= this.createSquareGround();
@@ -436,24 +447,27 @@ function initThree() {
         antialias : true
     });
     renderer.setSize(width, height);
+    renderer.shadowMapEnabled = true;
     document.getElementById('canvas-frame').appendChild(renderer.domElement);
     renderer.setClearColor(0xFFFFFF, 1.0);
+    renderer.shadowMapType = THREE.PCFSoftShadowMap;
 }
 
 //相机
 var camera;
 function initCamera() {
     camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.y = 20;
-    camera.position.z = 45;
-
+    camera.position.x = -500;
+    camera.position.y = 150;
+    camera.position.z = 200;
 }
 
 //场景
 var scene;
 function initScene() {
     scene = new THREE.Scene();
-    scene.fog	= new THREE.FogExp2(0xd0e0f0, 0.0025);
+    scene.fog	= new THREE.FogExp2(0xd0e0f0, 0.0005);
+
 }
 //
 var light;
@@ -461,6 +475,21 @@ function initLight() {
     light	= new THREE.HemisphereLight( 0xfffff0, 0x101020, 1.25 );
     light.position.set( 0.75, 1, 0.25 );
     scene.add( light );
+
+    var slight = new THREE.DirectionalLight(0xFFFFF0, 0.1);
+    slight.shadow.camera.near = 0; //产生阴影的最近距离
+    slight.shadow.camera.far = 1000; //产生阴影的最远距离
+    slight.shadow.camera.left = -200; //产生阴影距离位置的最左边位置
+    slight.shadow.camera.right = 200; //最右边
+    slight.shadow.camera.top = 200; //最上边
+    slight.shadow.camera.bottom = -200; //最下面
+    var helper = new THREE.CameraHelper( slight.shadow.camera );
+    scene.add( helper );
+    slight.shadowCameraVisible = true;
+    slight.position.set(400,400,400);
+    slight.castShadow = true;
+
+    scene.add(slight);
 }
 
 function initObject() {
