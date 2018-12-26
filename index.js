@@ -26,7 +26,7 @@ THREEx.ProceduralCity	= function(){
     /**
      * 生成建筑纹理
      */
-    // var buildingTexture	= new THREE.Texture(texture);
+    // var buildingTexture	= new THREE.Texture(generateTextureCanvas());
     // buildingTexture.anisotropy	= renderer.getMaxAnisotropy();
     // buildingTexture.needsUpdate = true;
 
@@ -56,13 +56,51 @@ THREEx.ProceduralCity	= function(){
     var lampH = 3;//路灯高度
 
     /**
+     * 创建广告牌
+     * @returns {THREE.Object3D}
+     */
+    this.createBillBoard	= function(){
+        var object3d = new THREE.Object3D();
+        var lampGeometry = new THREE.CubeGeometry(1, 1, 1);
+        lampGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.5, 0));
+        var video = document.querySelector("#video");
+        var texture = new THREE.VideoTexture(video);
+        var material1 = new THREE.MeshBasicMaterial( { map: texture } );
+        var material2 = new THREE.MeshBasicMaterial( { color: 0x111111 } );
+        var materials = [material1, material1, material2, material2, material1, material1];
+        var lampMesh = new THREE.Mesh(lampGeometry, materials);
+        lampMesh.scale.set(16, 9, 16);
+        lampMesh.position.y = 12;
+        object3d.add(lampMesh);
+
+        var cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, 32);
+        cylinderGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.5, 0));
+        var cylinderMesh = new THREE.Mesh(cylinderGeometry);
+        cylinderMesh.scale.set(1, 12, 1);
+        for(var i = 0; i < cylinderMesh.geometry.faces.length; i++ ) {
+            cylinderMesh.geometry.faces[i].color.set('grey' );
+        }
+        var material3 = new THREE.MeshLambertMaterial({
+            vertexColors	: THREE.VertexColors
+        });
+        cylinderMesh.material = material3;
+        object3d.add(cylinderMesh);
+        return object3d
+    };
+
+    /**
      * 创建地板
      * @returns {THREE.Mesh}
      */
     this.createSquareGround	= function(){
         var geometry = new THREE.PlaneGeometry(1, 1, 1);
+        var texture = THREE.ImageUtils.loadTexture("./images/road.jpg");
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 40, 40 );
+
         var material = new THREE.MeshLambertMaterial({
-            color	: 0x222222
+            map :texture,
         });
         var ground	= new THREE.Mesh(geometry, material);
         ground.lookAt(new THREE.Vector3(0,1,0));
@@ -70,6 +108,33 @@ THREEx.ProceduralCity	= function(){
         ground.scale.x	= (nBlockZ)*blockSizeZ;
         ground.scale.y	= (nBlockX)*blockSizeX;
         return ground;
+    };
+
+    /**
+     * 创建圆柱形建筑
+     * @returns {THREE.Object3D}
+     */
+    this.createb	= function(){
+        var geometry = new THREE.CylinderGeometry( 10, 10, 70, 32 );
+        var texture = THREE.ImageUtils.loadTexture("./images/house2/1.jpg");
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 4, 4 );
+        var material	= new THREE.MeshLambertMaterial({
+            map		: texture,
+        });
+
+        var texture1 = THREE.ImageUtils.loadTexture("./images/house2/2.jpg");
+        texture1.wrapS = THREE.RepeatWrapping;
+        texture1.wrapT = THREE.RepeatWrapping;
+        texture1.repeat.set( 3, 3 );
+        var material1	= new THREE.MeshLambertMaterial({
+            map		: texture1,
+        });
+        var materials = [material, material1, material1];
+        var cylinder = new THREE.Mesh( geometry, materials );
+        cylinder.position.x = 100;
+        return cylinder;
     };
 
     /**
@@ -290,8 +355,12 @@ THREEx.ProceduralCity	= function(){
             }
         }
         // build the mesh
+        var texture = THREE.ImageUtils.loadTexture("./images/floor.jpg");
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 12, 12 );
         var material	= new THREE.MeshLambertMaterial({
-            color	: 0x444444
+            map		: texture,
         });
         return new THREE.Mesh(sidewalksGeometry, material )
     };
@@ -329,12 +398,15 @@ THREEx.ProceduralCity	= function(){
 
         // build the city Mesh
         var material	= new THREE.MeshLambertMaterial({
-            map		: THREE.ImageUtils.loadTexture("./images/s1.jpg"),
+            map		: THREE.ImageUtils.loadTexture("./images/house1/1.jpg"),
             // vertexColors	: THREE.VertexColors
         });
+        var texture = THREE.ImageUtils.loadTexture("./images/house1/2.jpg");
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 4, 4 );
         var material1	= new THREE.MeshLambertMaterial({
-            map		: THREE.ImageUtils.loadTexture("./images/a.jpg"),
-            // vertexColors	: THREE.VertexColors
+            map		: texture,
         });
         var materials = [material, material, material1, material, material, material];
         return new THREE.Mesh(cityGeometry, materials );
@@ -362,6 +434,12 @@ THREEx.ProceduralCity	= function(){
         var groundMesh	= this.createSquareGround();
         object3d.add(groundMesh);
 
+        var billBoard = this.createBillBoard();
+        object3d.add(billBoard);
+
+        // var groundMeshb	= this.createb();
+        // object3d.add(groundMeshb);
+
         return object3d
     };
 
@@ -388,38 +466,39 @@ THREEx.ProceduralCity	= function(){
         }
     };
 
-    function generateTextureCanvas(){
-        // build a small canvas 32x64 and paint it in white
-        var canvas	= document.createElement( 'canvas' );
-        canvas.width	= 32;
-        canvas.height	= 64;
-        var context	= canvas.getContext( '2d' );
-        // plain it in white
-        context.fillStyle	= '#ffb734';
-        context.fillRect( 0, 0, 32, 64 );
-        // draw the window rows - with a small noise to simulate light variations in each room
-        for( var y = 2; y < 64; y += 4 ){
-            for( var x = 0; x < 32; x += 2 ){
-                var value	= Math.floor( Math.random() * 10+240 );
-                context.fillStyle = 'rgb(' + [value, value, value].join( ',' )  + ')';
-                context.fillRect( x, y, 2, 1 );
-            }
-        }
-        // build a bigger canvas and copy the small one in it
-        // This is a trick to upscale the texture without filtering
-        var canvas2	= document.createElement( 'canvas' );
-        canvas2.width	= 512;
-        canvas2.height	= 1024;
-        var context	= canvas2.getContext( '2d' );
-        // disable smoothing
-        context.imageSmoothingEnabled		= false;
-        context.webkitImageSmoothingEnabled	= false;
-        context.mozImageSmoothingEnabled	= false;
-        // then draw the image
-        context.drawImage( canvas, 0, 0, canvas2.width, canvas2.height );
-        // return the just built canvas2
-        return canvas2;
-    }
+    // function generateTextureCanvas(){
+    //     // build a small canvas 32x64 and paint it in white
+    //     var canvas	= document.createElement( 'canvas' );
+    //     canvas.width	= 32;
+    //     canvas.height	= 64;
+    //     var context	= canvas.getContext( '2d' );
+    //     // plain it in white
+    //     context.fillStyle	= '#ffffff';
+    //     context.fillRect( 0, 0, 32, 64 );
+    //     // draw the window rows - with a small noise to simulate light variations in each room
+    //     for( var y = 2; y < 64; y += 2 ){
+    //         for( var x = 0; x < 32; x += 2 ){
+    //             var value	= Math.floor( Math.random() * 64 );
+    //             context.fillStyle = 'rgb(' + [value, value, value].join( ',' )  + ')';
+    //             context.fillRect( x, y, 2, 1 );
+    //         }
+    //     }
+    //
+    //     // build a bigger canvas and copy the small one in it
+    //     // This is a trick to upscale the texture without filtering
+    //     var canvas2	= document.createElement( 'canvas' );
+    //     canvas2.width	= 512;
+    //     canvas2.height	= 1024;
+    //     var context	= canvas2.getContext( '2d' );
+    //     // disable smoothing
+    //     context.imageSmoothingEnabled		= false;
+    //     context.webkitImageSmoothingEnabled	= false;
+    //     context.mozImageSmoothingEnabled	= false;
+    //     // then draw the image
+    //     context.drawImage( canvas, 0, 0, canvas2.width, canvas2.height );
+    //     // return the just built canvas2
+    //     return canvas2;
+    // }
 };
 
 function initSkyBox() {
@@ -458,10 +537,10 @@ function initScene() {
     scene = new THREE.Scene();
     scene.fog	= new THREE.FogExp2(0xd0e0f0, 0.0005);
 }
-//
+//光线
 var light;
 function initLight() {
-    light	= new THREE.HemisphereLight( 0xfffff0, 0x101020, 1.5 );
+    light	= new THREE.HemisphereLight( 0xffffff, 0x101020, 1.25 );
     light.position.set( 0.75, 1, 0.25 );
     scene.add( light );
 }
