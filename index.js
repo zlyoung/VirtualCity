@@ -1,18 +1,10 @@
 var THREEx = THREEx || {};
+
 THREEx.ProceduralCity	= function(){
     // 为每个建筑物建立基本几何形状
     var geometry = new THREE.CubeGeometry( 1, 1, 1 );
     // 将参考点设置在立方体的底部
     geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.5, 0 ) );
-    // 去掉立方体的底面
-    // geometry.faces.splice( 3, 1 );
-    // geometry.faceVertexUvs[0].splice( 3, 1 );
-    // 修复顶面的UV映射
-    // 屋顶将和地板颜色相同，且建筑物的各面纹理共用
-    // geometry.faceVertexUvs[0][3][3].set( 0, 0);
-    // geometry.faceVertexUvs[0][3][3].set( 0, 0 );
-    // // geometry.faceVertexUvs[0][2][2].set( 0, 0 );
-    // // geometry.faceVertexUvs[0][2][3].set( 0, 0 );
     // 建筑物网孔
     var buildingMesh= new THREE.Mesh( geometry );
 
@@ -109,7 +101,7 @@ THREEx.ProceduralCity	= function(){
      * @returns {THREE.Object3D}
      */
     this.createb	= function(){
-        var geometry = new THREE.CylinderGeometry( 10, 10, 70, 5 );
+        var geometry = new THREE.CylinderGeometry( 10, 10, 70, 32 );
         var texture = THREE.ImageUtils.loadTexture("./images/house2/1.jpg");
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -127,7 +119,8 @@ THREEx.ProceduralCity	= function(){
         });
         var materials = [material, material1, material1];
         var cylinder = new THREE.Mesh( geometry, materials );
-        cylinder.position.x = 100;
+        cylinder.position.x = 75;
+        cylinder.position.z = 75    ;
         return cylinder;
     };
 
@@ -336,7 +329,7 @@ THREEx.ProceduralCity	= function(){
         var sidewalksGeometry= new THREE.Geometry();
         for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
             for( var blockX = 0; blockX < nBlockX; blockX++){
-                // set position
+                // 设置位置
                 buildingMesh.position.x	= (blockX+0.5-nBlockX/2)*blockSizeX;
                 buildingMesh.position.z	= (blockZ+0.5-nBlockZ/2)*blockSizeZ;
 
@@ -344,11 +337,10 @@ THREEx.ProceduralCity	= function(){
                 buildingMesh.scale.y	= sidewalkH;
                 buildingMesh.scale.z	= blockSizeZ-roadD;
 
-                // merge it with cityGeometry - very important for performance
+                // 合成一个对象，提高性能
                 THREE.GeometryUtils.merge( sidewalksGeometry, buildingMesh );
             }
         }
-        // build the mesh
         var texture = THREE.ImageUtils.loadTexture("./images/floor.jpg");
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -368,24 +360,24 @@ THREEx.ProceduralCity	= function(){
         var cityGeometry= new THREE.Geometry();
         for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
             for( var blockX = 0; blockX < nBlockX; blockX++){
+                if (blockX === 6 && blockZ === 6)
+                    continue;
                 for( var i = 0; i < blockDensity; i++){
-                    // set position
+                    // 设置位置
                     buildingMesh.position.x	= (Math.random()-0.5)*(blockSizeX-buildingMaxW-roadW-sidewalkW);
                     buildingMesh.position.z	= (Math.random()-0.5)*(blockSizeZ-buildingMaxD-roadD-sidewalkD);
-                    // add position for the blocks
+                    // 为每个块设置位置
                     buildingMesh.position.x	+= (blockX+0.5-nBlockX/2)*blockSizeX;
                     buildingMesh.position.z	+= (blockZ+0.5-nBlockZ/2)*blockSizeZ;
-                    // put a random scale
-                    buildingMesh.scale.x	= Math.min(Math.random() * 5 + 10, buildingMaxW);
+                    // 随机大小
+                    buildingMesh.scale.x	= Math.min(Math.random() * 5 + 7, buildingMaxW);
                     buildingMesh.scale.y	= (Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 6;
                     buildingMesh.scale.z	= Math.min(buildingMesh.scale.x, buildingMaxD);
-                    // merge it with cityGeometry - very important for performance
+                    // 合成一个对象，提高性能
                     THREE.GeometryUtils.merge( cityGeometry, buildingMesh );
                 }
             }
         }
-
-        // build the city Mesh
         var material	= new THREE.MeshLambertMaterial({
             map		: THREE.ImageUtils.loadTexture("./images/house1/1.jpg"),
         });
@@ -407,24 +399,24 @@ THREEx.ProceduralCity	= function(){
         var cityGeometry= new THREE.Geometry();
         for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
             for( var blockX = 0; blockX < nBlockX; blockX++){
+                if (blockX === 6 && blockZ === 6)
+                    continue;
                 for( var i = 0; i < blockDensity; i++){
-                    // set position
+                    // 设置位置
                     buildingMesh.position.x	= (Math.random()-0.5)*(blockSizeX-buildingMaxW-roadW-sidewalkW);
                     buildingMesh.position.z	= (Math.random()-0.5)*(blockSizeZ-buildingMaxD-roadD-sidewalkD);
-                    // add position for the blocks
+                    // 为每个块设置位置
                     buildingMesh.position.x	+= (blockX+0.5-nBlockX/2)*blockSizeX;
                     buildingMesh.position.z	+= (blockZ+0.5-nBlockZ/2)*blockSizeZ;
-                    // put a random scale
-                    buildingMesh.scale.x	= Math.min(Math.random() * 5 + 10, buildingMaxW);
+                    // 随机大小
+                    buildingMesh.scale.x	= Math.min(Math.random() * 5 + 7, buildingMaxW);
                     buildingMesh.scale.y	= (Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 6;
                     buildingMesh.scale.z	= Math.min(buildingMesh.scale.x, buildingMaxD);
-                    // merge it with cityGeometry - very important for performance
+                    // 合成一个对象，提高性能
                     THREE.GeometryUtils.merge( cityGeometry, buildingMesh );
                 }
             }
         }
-
-        // build the city Mesh
         var material	= new THREE.MeshLambertMaterial({
             map		: THREE.ImageUtils.loadTexture("./images/house3/1.jpg"),
         });
@@ -468,8 +460,76 @@ THREEx.ProceduralCity	= function(){
         var groundMeshb	= this.createb();
         object3d.add(groundMeshb);
 
+        this.initModel();
+
         return object3d
     };
+
+    this.initModel = function () {
+        var positions = new Array(10);
+        positions[0] = new THREE.Vector3(7, sidewalkH, 7);
+        positions[1] = new THREE.Vector3(7, sidewalkH, -7);
+        positions[2] = new THREE.Vector3(-7, sidewalkH, 7);
+        positions[3] = new THREE.Vector3(-7, sidewalkH, -7);
+        positions[4] = new THREE.Vector3(14, sidewalkH, 7);
+        positions[5] = new THREE.Vector3(14, sidewalkH, -7);
+        positions[6] = new THREE.Vector3(-14, sidewalkH, 7);
+        positions[7] = new THREE.Vector3(-14, sidewalkH, -7);
+        positions[9] = new THREE.Vector3(7, sidewalkH, 14);
+        positions[8] = new THREE.Vector3(7, sidewalkH, -14);
+        positions[10] = new THREE.Vector3(-7, sidewalkH, 14);
+        positions[11] = new THREE.Vector3(-7, sidewalkH, -14);
+        for (var i=0;i<6;i++){
+            initModel1(positions[i]);
+        }
+        for (i=7;i<12;i++){
+            initModel2(positions[i]);
+        }
+    };
+
+    function initModel1(position){
+        var mtlLoader = new THREE.MTLLoader();
+        //加载mtl文件
+        mtlLoader.load('model/female02/female02.mtl', function (material) {
+            material.preload();
+            var objLoader = new THREE.OBJLoader();
+            //设置当前加载的纹理
+            objLoader.setMaterials(material);
+            objLoader.load('model/female02/female02.obj', function (object) {
+                //将模型缩放并添加到场景当中
+                object.scale.x = 0.02;
+                object.scale.y = 0.02;
+                object.scale.z = 0.02;
+                object.position.x = position.x;
+                object.position.z = position.z;
+                object.position.y = position.y;
+                object.rotation.y = 360*Math.random();
+                scene.add(object);
+            })
+        });
+    }
+
+    function initModel2(position){
+        var mtlLoader = new THREE.MTLLoader();
+        //加载mtl文件
+        mtlLoader.load('model/male02/male02.mtl', function (material) {
+            material.preload();
+            var objLoader = new THREE.OBJLoader();
+            //设置当前加载的纹理
+            objLoader.setMaterials(material);
+            objLoader.load('model/male02/male02.obj', function (object) {
+                //将模型缩放并添加到场景当中
+                object.scale.x = 0.02;
+                object.scale.y = 0.02;
+                object.scale.z = 0.02;
+                object.position.x = position.x;
+                object.position.z = position.z;
+                object.position.y = position.y;
+                object.rotation.y = 360*Math.random();
+                scene.add(object);
+            })
+        });
+    }
 };
 
 function initSkyBox() {
@@ -504,9 +564,7 @@ function initThree() {
 var camera;
 function initCamera() {
     camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.x = -500;
-    camera.position.y = 150;
-    camera.position.z = 200;
+    camera.position.set(-250, 80, 30);
 }
 
 //场景
@@ -533,13 +591,12 @@ function initObject() {
 var updateFcts	= [];
 function initControl(){
     var controls	= new THREE.FirstPersonControls(camera);
-    controls.movementSpeed	= 100;
-    controls.lookSpeed	= 0.05;
+    controls.movementSpeed	= 20;
+    controls.lookSpeed	= 0.08;
     controls.lookVertical	= true;
     updateFcts.push(function(delta){
         controls.update( delta );
     });
-
     //	render the scene
     updateFcts.push(function(){
         renderer.render( scene, camera );

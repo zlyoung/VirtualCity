@@ -13,6 +13,7 @@ THREE.FirstPersonControls = function (object, domElement) {
 
 	this.movementSpeed = 1.0;
 	this.lookSpeed = 0.005;
+	this.limit = 250;
 
 	this.lookVertical = true;
 	this.autoForward = false;
@@ -158,24 +159,53 @@ THREE.FirstPersonControls = function (object, domElement) {
             if (this.object.position.y <= 2){
                 this.object.translateZ(actualMoveSpeed + this.autoSpeedFactor);
             }
+            if (this.object.position.x <= -this.limit || this.object.position.x >= this.limit
+			|| this.object.position.z <= -this.limit || this.object.position.z >= this.limit){
+                this.object.translateZ(actualMoveSpeed + this.autoSpeedFactor);
+            }
         }
 		if ( this.moveBackward ){
             this.object.translateZ( actualMoveSpeed );
             if (this.object.position.y <= 2){
                 this.object.translateZ( -actualMoveSpeed );
             }
+            if (this.object.position.x <= -this.limit || this.object.position.x >= this.limit
+                || this.object.position.z <= -this.limit || this.object.position.z >= this.limit){
+                this.object.translateZ(-actualMoveSpeed);
+            }
         }
 
-		if ( this.moveLeft )
-		    this.object.translateX( - actualMoveSpeed );
-		if ( this.moveRight )
-		    this.object.translateX( actualMoveSpeed );
-		if ( this.moveUp )
-		    this.object.translateY( actualMoveSpeed );
+		if ( this.moveLeft ){
+            this.object.translateX( - actualMoveSpeed );
+            if (this.object.position.x <= -this.limit || this.object.position.x >= this.limit
+                || this.object.position.z <= -this.limit || this.object.position.z >= this.limit){
+                this.object.translateX(actualMoveSpeed);
+                console.log("dd");
+            }
+		}
+		if ( this.moveRight ){
+            this.object.translateX( actualMoveSpeed );
+            if (this.object.position.x <= -this.limit || this.object.position.x >= this.limit
+                || this.object.position.z <= -this.limit || this.object.position.z >= this.limit){
+                this.object.translateX(-actualMoveSpeed);
+            }
+		}
+		if ( this.moveUp ){
+            this.object.translateY( actualMoveSpeed );
+            if (this.object.position.x <= -this.limit || this.object.position.x >= this.limit
+                || this.object.position.z <= -this.limit || this.object.position.z >= this.limit){
+                this.object.translateY(-actualMoveSpeed);
+            }
+		}
+
 		if ( this.moveDown ){
             this.object.translateY( - actualMoveSpeed );
             if (this.object.position.y <= 2){
                 this.object.translateY( actualMoveSpeed );
+            }
+            if (this.object.position.x <= -this.limit || this.object.position.x >= this.limit
+                || this.object.position.z <= -this.limit || this.object.position.z >= this.limit){
+                this.object.translateY(actualMoveSpeed);
             }
         }
 
@@ -209,7 +239,7 @@ THREE.FirstPersonControls = function (object, domElement) {
 		targetPosition.x = position.x + 100 * Math.sin( this.phi ) * Math.cos( this.theta );
 		targetPosition.y = position.y + 100 * Math.cos( this.phi );
 		targetPosition.z = position.z + 100 * Math.sin( this.phi ) * Math.sin( this.theta );
-
+		// console.log(this.object.position);
 		this.object.lookAt( targetPosition );
 	};
 
