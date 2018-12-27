@@ -179,7 +179,6 @@ THREE.FirstPersonControls = function (object, domElement) {
             }
         }
 
-
 		var actualLookSpeed = delta * this.lookSpeed;
 
 		if ( !this.activeLook ) {

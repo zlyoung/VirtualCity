@@ -23,12 +23,6 @@ THREEx.ProceduralCity	= function(){
     this.createBuilding	= function(){
         return buildingMesh;
     };
-    /**
-     * 生成建筑纹理
-     */
-    // var buildingTexture	= new THREE.Texture(generateTextureCanvas());
-    // buildingTexture.anisotropy	= renderer.getMaxAnisotropy();
-    // buildingTexture.needsUpdate = true;
 
     /**
      * lamp
@@ -39,11 +33,11 @@ THREEx.ProceduralCity	= function(){
     /**
      * 参数设置
      */
-    var nBlockX	= 8;//行数
-    var nBlockZ	= 8;//列数
+    var nBlockX	= 10;//行数
+    var nBlockZ	= 10;//列数
     var blockSizeX = 50;//行宽
     var blockSizeZ = 50;//列宽
-    var blockDensity = 4;
+    var blockDensity = 2;
     var roadW = 8;
     var roadD = 8;
     var buildingMaxW = 15;
@@ -115,7 +109,7 @@ THREEx.ProceduralCity	= function(){
      * @returns {THREE.Object3D}
      */
     this.createb	= function(){
-        var geometry = new THREE.CylinderGeometry( 10, 10, 70, 32 );
+        var geometry = new THREE.CylinderGeometry( 10, 10, 70, 5 );
         var texture = THREE.ImageUtils.loadTexture("./images/house2/1.jpg");
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -366,10 +360,10 @@ THREEx.ProceduralCity	= function(){
     };
 
     /**
-     * 创建建筑
+     * 创建建筑1
      * @returns {THREE.Mesh}
      */
-    this.createSquareBuildings	= function(){
+    this.createSquareBuildings1	= function(){
         var buildingMesh= this.createBuilding();
         var cityGeometry= new THREE.Geometry();
         for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
@@ -378,18 +372,13 @@ THREEx.ProceduralCity	= function(){
                     // set position
                     buildingMesh.position.x	= (Math.random()-0.5)*(blockSizeX-buildingMaxW-roadW-sidewalkW);
                     buildingMesh.position.z	= (Math.random()-0.5)*(blockSizeZ-buildingMaxD-roadD-sidewalkD);
-
                     // add position for the blocks
                     buildingMesh.position.x	+= (blockX+0.5-nBlockX/2)*blockSizeX;
                     buildingMesh.position.z	+= (blockZ+0.5-nBlockZ/2)*blockSizeZ;
-
                     // put a random scale
                     buildingMesh.scale.x	= Math.min(Math.random() * 5 + 10, buildingMaxW);
-                    buildingMesh.scale.y	= (Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 4;
+                    buildingMesh.scale.y	= (Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 6;
                     buildingMesh.scale.z	= Math.min(buildingMesh.scale.x, buildingMaxD);
-
-                    this.colorifyBuilding(buildingMesh);
-
                     // merge it with cityGeometry - very important for performance
                     THREE.GeometryUtils.merge( cityGeometry, buildingMesh );
                 }
@@ -399,15 +388,51 @@ THREEx.ProceduralCity	= function(){
         // build the city Mesh
         var material	= new THREE.MeshLambertMaterial({
             map		: THREE.ImageUtils.loadTexture("./images/house1/1.jpg"),
-            // vertexColors	: THREE.VertexColors
         });
         var texture = THREE.ImageUtils.loadTexture("./images/house1/2.jpg");
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set( 4, 4 );
-        var material1	= new THREE.MeshLambertMaterial({
-            map		: texture,
+        var material1	= new THREE.MeshLambertMaterial({map : texture,});
+        var materials = [material, material, material1, material, material, material];
+        return new THREE.Mesh(cityGeometry, materials );
+    };
+
+    /**
+     * 创建建筑2
+     * @returns {THREE.Mesh}
+     */
+    this.createSquareBuildings2	= function(){
+        var buildingMesh= this.createBuilding();
+        var cityGeometry= new THREE.Geometry();
+        for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
+            for( var blockX = 0; blockX < nBlockX; blockX++){
+                for( var i = 0; i < blockDensity; i++){
+                    // set position
+                    buildingMesh.position.x	= (Math.random()-0.5)*(blockSizeX-buildingMaxW-roadW-sidewalkW);
+                    buildingMesh.position.z	= (Math.random()-0.5)*(blockSizeZ-buildingMaxD-roadD-sidewalkD);
+                    // add position for the blocks
+                    buildingMesh.position.x	+= (blockX+0.5-nBlockX/2)*blockSizeX;
+                    buildingMesh.position.z	+= (blockZ+0.5-nBlockZ/2)*blockSizeZ;
+                    // put a random scale
+                    buildingMesh.scale.x	= Math.min(Math.random() * 5 + 10, buildingMaxW);
+                    buildingMesh.scale.y	= (Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 6;
+                    buildingMesh.scale.z	= Math.min(buildingMesh.scale.x, buildingMaxD);
+                    // merge it with cityGeometry - very important for performance
+                    THREE.GeometryUtils.merge( cityGeometry, buildingMesh );
+                }
+            }
+        }
+
+        // build the city Mesh
+        var material	= new THREE.MeshLambertMaterial({
+            map		: THREE.ImageUtils.loadTexture("./images/house3/1.jpg"),
         });
+        var texture = THREE.ImageUtils.loadTexture("./images/house3/2.jpg");
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 4, 4 );
+        var material1	= new THREE.MeshLambertMaterial({map : texture,});
         var materials = [material, material, material1, material, material, material];
         return new THREE.Mesh(cityGeometry, materials );
     };
@@ -428,8 +453,11 @@ THREEx.ProceduralCity	= function(){
         var sidewalksMesh = this.createSquareSideWalks();
         object3d.add(sidewalksMesh);
 
-        var buildingsMesh = this.createSquareBuildings();
-        object3d.add(buildingsMesh);
+        var buildingsMesh1 = this.createSquareBuildings1();
+        object3d.add(buildingsMesh1);
+
+        var buildingsMesh2 = this.createSquareBuildings2();
+        object3d.add(buildingsMesh2);
 
         var groundMesh	= this.createSquareGround();
         object3d.add(groundMesh);
@@ -437,68 +465,11 @@ THREEx.ProceduralCity	= function(){
         var billBoard = this.createBillBoard();
         object3d.add(billBoard);
 
-        // var groundMeshb	= this.createb();
-        // object3d.add(groundMeshb);
+        var groundMeshb	= this.createb();
+        object3d.add(groundMeshb);
 
         return object3d
     };
-
-    // base colors for vertexColors. light is for vertices at the top, shaddow is for the ones at the bottom
-    var light	= new THREE.Color( 0xffffff );
-    var shadow	= new THREE.Color( 0x303050 );
-    this.colorifyBuilding	= function(buildingMesh){
-        // establish the base color for the buildingMesh
-        var value	= 1 - Math.random() * Math.random();
-        var baseColor	= new THREE.Color().setRGB( value + Math.random() * 0.1, value, value + Math.random() * 0.1 );
-        // set topColor/bottom vertexColors as adjustement of baseColor
-        var topColor	= baseColor.clone().multiply( light );
-        var bottomColor	= baseColor.clone().multiply( shadow );
-        // set .vertexColors for each face
-        var geometry	= buildingMesh.geometry;
-        for ( var j = 0, jl = geometry.faces.length; j < jl; j ++ ) {
-            if ( j === 2 ) {
-                // set face.vertexColors on root face
-                geometry.faces[ j ].vertexColors = [ baseColor, baseColor, baseColor, baseColor ];
-            } else {
-                // set face.vertexColors on sides faces
-                geometry.faces[ j ].vertexColors = [ topColor, bottomColor, bottomColor, topColor ];
-            }
-        }
-    };
-
-    // function generateTextureCanvas(){
-    //     // build a small canvas 32x64 and paint it in white
-    //     var canvas	= document.createElement( 'canvas' );
-    //     canvas.width	= 32;
-    //     canvas.height	= 64;
-    //     var context	= canvas.getContext( '2d' );
-    //     // plain it in white
-    //     context.fillStyle	= '#ffffff';
-    //     context.fillRect( 0, 0, 32, 64 );
-    //     // draw the window rows - with a small noise to simulate light variations in each room
-    //     for( var y = 2; y < 64; y += 2 ){
-    //         for( var x = 0; x < 32; x += 2 ){
-    //             var value	= Math.floor( Math.random() * 64 );
-    //             context.fillStyle = 'rgb(' + [value, value, value].join( ',' )  + ')';
-    //             context.fillRect( x, y, 2, 1 );
-    //         }
-    //     }
-    //
-    //     // build a bigger canvas and copy the small one in it
-    //     // This is a trick to upscale the texture without filtering
-    //     var canvas2	= document.createElement( 'canvas' );
-    //     canvas2.width	= 512;
-    //     canvas2.height	= 1024;
-    //     var context	= canvas2.getContext( '2d' );
-    //     // disable smoothing
-    //     context.imageSmoothingEnabled		= false;
-    //     context.webkitImageSmoothingEnabled	= false;
-    //     context.mozImageSmoothingEnabled	= false;
-    //     // then draw the image
-    //     context.drawImage( canvas, 0, 0, canvas2.width, canvas2.height );
-    //     // return the just built canvas2
-    //     return canvas2;
-    // }
 };
 
 function initSkyBox() {
@@ -511,6 +482,7 @@ function initSkyBox() {
 var renderer;
 var width;
 var height;
+var stats;
 function initThree() {
     width = document.getElementById('canvas-frame').clientWidth;
     height = document.getElementById('canvas-frame').clientHeight;
@@ -520,6 +492,12 @@ function initThree() {
     renderer.setSize(width, height);
     document.getElementById('canvas-frame').appendChild(renderer.domElement);
     renderer.setClearColor(0xFFFFFF, 1.0);
+
+    stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    document.getElementById('canvas-frame').appendChild(stats.domElement);
 }
 
 //相机
@@ -581,7 +559,8 @@ function render()
         // call each update function
         updateFcts.forEach(function(updateFn){
             updateFn(deltaMsec/1000, nowMsec/1000)
-        })
+        });
+        stats.update();
     });
 }
 
